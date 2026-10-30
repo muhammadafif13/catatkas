@@ -1,0 +1,3 @@
+-- Default user data is created by public.handle_new_user / public.seed_user_defaults.
+-- Promote the owner to admin once after registering:
+--   select public.bootstrap_admin('owner@example.com');

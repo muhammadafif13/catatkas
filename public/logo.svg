@@ -1,0 +1,34 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="Logo CatatKas">
+  <defs>
+    <linearGradient id="bg" x1="88" y1="48" x2="424" y2="464" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#818cf8" />
+      <stop offset="0.5" stop-color="#6366f1" />
+      <stop offset="1" stop-color="#312e81" />
+    </linearGradient>
+    <linearGradient id="wallet" x1="128" y1="144" x2="384" y2="384" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#ffffff" />
+      <stop offset="1" stop-color="#e0e7ff" />
+    </linearGradient>
+    <linearGradient id="coin" x1="352" y1="232" x2="416" y2="296" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#fde68a" />
+      <stop offset="1" stop-color="#f59e0b" />
+    </linearGradient>
+    <filter id="shadow" x="64" y="96" width="384" height="336" filterUnits="userSpaceOnUse">
+      <feDropShadow dx="0" dy="20" stdDeviation="18" flood-color="#1e1b4b" flood-opacity="0.35" />
+    </filter>
+  </defs>
+  <rect width="512" height="512" rx="112" fill="url(#bg)" />
+  <circle cx="256" cy="224" r="180" fill="#ffffff" opacity="0.06" />
+  <circle cx="132" cy="110" r="60" fill="#a5b4fc" opacity="0.22" />
+  <g filter="url(#shadow)">
+    <path d="M136 196C136 174.461 153.461 157 175 157H337C358.539 157 376 174.461 376 196V206H328C292.654 206 264 234.654 264 270C264 305.346 292.654 334 328 334H376V344C376 365.539 358.539 383 337 383H175C153.461 383 136 365.539 136 344V196Z" fill="url(#wallet)" />
+    <path d="M328 240H376C392.569 240 406 253.431 406 270C406 286.569 392.569 300 376 300H328C301.49 300 280 278.51 280 252V288C280 261.49 301.49 240 328 240Z" fill="#c7d2fe" />
+    <rect x="316" y="244" width="100" height="52" rx="26" fill="#4f46e5" />
+    <circle cx="366" cy="270" r="14" fill="url(#coin)" />
+    <circle cx="366" cy="270" r="6" fill="#fff7ed" opacity="0.7" />
+    <path d="M188 230H260" stroke="#6366f1" stroke-width="16" stroke-linecap="round" opacity="0.35" />
+    <path d="M188 266H232" stroke="#6366f1" stroke-width="16" stroke-linecap="round" opacity="0.2" />
+  </g>
+  <path d="M398 118L412 158L452 172L412 186L398 226L384 186L344 172L384 158L398 118Z" fill="#fbbf24" opacity="0.95" />
+  <circle cx="114" cy="362" r="18" fill="#22c55e" opacity="0.85" />
+</svg>

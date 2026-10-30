@@ -1,0 +1,14 @@
+{
+  "appId": "com.catatkas.app",
+  "appName": "CatatKas",
+  "webDir": "dist",
+  "backgroundColor": "#0f172a",
+  "android": {
+    "allowMixedContent": true,
+    "backgroundColor": "#0f172a"
+  },
+  "server": {
+    "androidScheme": "https",
+    "cleartext": true
+  }
+}
