@@ -125,9 +125,9 @@ Layanan lokal:
 | Layanan | URL |
 |---|---|
 | Aplikasi | `http://localhost:5173` |
-| Supabase API | `http://127.0.0.1:54321` |
-| Supabase Studio | `http://127.0.0.1:54323` |
-| Mailpit | `http://127.0.0.1:54324` |
+| Supabase API | `http://127.0.0.1:55321` |
+| Supabase Studio | `http://127.0.0.1:55323` |
+| Mailpit | `http://127.0.0.1:55324` |
 
 Email reset password tidak dikirim keluar saat development; buka Mailpit untuk mengambil tautannya. Signup tidak mengirim email verifikasi dan akun langsung aktif.
 
@@ -166,7 +166,7 @@ Jangan menaruh service role key di variabel `VITE_*`. File `.env.local`, `supaba
 | `npm run preview` | Preview build production |
 | `npm run lint` | ESLint |
 | `npm test` | Unit test Vitest |
-| `npm run icons` | Generate ulang ikon PWA |
+| `npm run icons` | Generate ulang ikon PWA, ikon Android, dan splash screen |
 | `npm run supabase:start` | Jalankan Supabase lokal |
 | `npm run supabase:stop` | Hentikan Supabase lokal |
 | `npm run supabase:status` | Status dan kredensial lokal |
