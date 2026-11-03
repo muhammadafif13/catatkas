@@ -9,6 +9,7 @@ export function useAppBootstrap() {
   const status = useAuthStore((state) => state.status);
   const error = useAuthStore((state) => state.error);
   const retry = useAuthStore((state) => state.retry);
+  const setOfflineMode = useAuthStore((state) => state.setOfflineMode);
 
   useEffect(() => {
     void useAuthStore.getState().initialize();
@@ -31,6 +32,7 @@ export function useAppBootstrap() {
       try {
         await syncAndRefresh(next.user.id);
         next.setSyncError(null);
+        next.setOfflineMode(false);
       } catch (syncError) {
         next.setSyncError(getErrorMessage(syncError));
       }
@@ -44,6 +46,7 @@ export function useAppBootstrap() {
       useAuthStore
         .getState()
         .setSyncError('Mode offline: kamu dapat membaca data, tetapi perubahan dinonaktifkan.');
+      useAuthStore.getState().setOfflineMode(true);
     };
 
     const handleFocus = () => {

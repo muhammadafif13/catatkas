@@ -1,5 +1,10 @@
 import { create } from 'zustand';
-import { isOnline, isSupabaseConfigured, supabase } from '../lib/supabase';
+import { isOnline, isNetworkError, isSupabaseConfigured, supabase } from '../lib/supabase';
+import {
+  saveOfflineIdentity,
+  readOfflineIdentity,
+  clearOfflineIdentity,
+} from '../lib/offlineAuth';
 import { clearCache, prepareCacheForUser } from '../db/cache';
 import { profileFromRow } from '../services/mappers';
 import { refreshDataStores, syncUserData } from '../services/sync';
@@ -138,6 +143,12 @@ async function hydrate(session) {
     }
 
     cacheProfile(profile);
+    saveOfflineIdentity({
+      userId: user.id,
+      email: profile.email,
+      fullName: profile.fullName,
+      role: profile.role,
+    });
 
     if (profile.isSuspended) {
       clearCachedProfile();
@@ -166,7 +177,7 @@ async function hydrate(session) {
 
     if (generation !== hydrateGeneration) return;
 
-    useAuthStore.setState({ session, user, profile, syncError, error: null });
+    useAuthStore.setState({ session, user, profile, syncError, error: null, offlineMode: false });
     await refreshDataStores();
 
     if (generation !== hydrateGeneration) return;
@@ -189,11 +200,12 @@ async function hydrate(session) {
     }
 
     useAuthStore.setState({
-      status: 'auth_error',
+      status: 'authenticated',
       session,
       user,
       profile: cachedProfile,
       error: authErrorMessage(error),
+      offlineMode: true,
     });
   }
 }
@@ -201,6 +213,7 @@ async function hydrate(session) {
 async function clearLocalSession() {
   hydrateGeneration += 1;
   clearCachedProfile();
+  clearOfflineIdentity();
   resetDataStores();
   await clearCache().catch(() => {});
   useAuthStore.setState({
@@ -210,7 +223,43 @@ async function clearLocalSession() {
     profile: null,
     error: null,
     syncError: null,
+    offlineMode: false,
   });
+}
+
+async function enterOfflineMode() {
+  const identity = readOfflineIdentity();
+  const cachedProfile = identity ? readCachedProfile(identity.userId) : null;
+
+  if (!identity || !cachedProfile) {
+    useAuthStore.setState({
+      status: 'unauthenticated',
+      session: null,
+      user: null,
+      profile: null,
+      error: null,
+      syncError: 'Sambungkan internet sekali untuk membuka akun.',
+    });
+    return;
+  }
+
+  try {
+    await prepareCacheForUser(identity.userId);
+  } catch {
+    // Cache may be unavailable — continue with whatever data is in the stores.
+  }
+
+  useAuthStore.setState({
+    status: 'authenticated',
+    session: null,
+    user: { id: identity.userId },
+    profile: cachedProfile,
+    error: null,
+    syncError: 'Mode offline: kamu dapat membaca data, tetapi perubahan dinonaktifkan.',
+    offlineMode: true,
+  });
+
+  await refreshDataStores();
 }
 
 export const useAuthStore = create((set, get) => ({
@@ -220,6 +269,7 @@ export const useAuthStore = create((set, get) => ({
   profile: null,
   error: null,
   syncError: null,
+  offlineMode: false,
 
   initialize: async () => {
     if (!isSupabaseConfigured) {
@@ -250,7 +300,20 @@ export const useAuthStore = create((set, get) => ({
         authSubscription = data.subscription;
       }
 
-      const { data, error } = await supabase.auth.getSession();
+      // When the browser is offline, never block on Supabase — fall back to the
+      // locally cached identity and data instead of showing a login screen.
+      if (!isOnline()) {
+        await enterOfflineMode();
+        return;
+      }
+
+      let { data, error } = await supabase.auth.getSession();
+
+      if (error && isNetworkError(error)) {
+        await enterOfflineMode();
+        return;
+      }
+
       if (error) {
         set({ status: 'auth_error', error: authErrorMessage(error) });
         return;
@@ -267,12 +330,17 @@ export const useAuthStore = create((set, get) => ({
   },
 
   setSyncError: (syncError) => set({ syncError }),
+  setOfflineMode: (value) => set({ offlineMode: value }),
 
   retry: async () => {
     set({ status: 'loading', error: null });
     const { data, error } = await supabase.auth.getSession();
     if (error) {
-      set({ status: 'auth_error', error: authErrorMessage(error) });
+      if (isNetworkError(error)) {
+        await enterOfflineMode();
+      } else {
+        set({ status: 'auth_error', error: authErrorMessage(error) });
+      }
       return;
     }
     if (!data.session) {

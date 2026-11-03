@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
-import { Save, Wallet } from 'lucide-react';
+import { Save, WifiOff, Wallet } from 'lucide-react';
 import AmountInput from '../components/forms/AmountInput';
 import CategoryPicker from '../components/forms/CategoryPicker';
 import FormField from '../components/forms/FormField';
@@ -13,6 +13,7 @@ import { toast } from '../stores/useUIStore';
 import { getErrorMessage } from '../utils/helpers';
 import { nowTime, toISODate, todayISO } from '../utils/formatDate';
 import { validateTransaction } from '../utils/validation';
+import { useOfflineMode } from '../hooks/useOfflineMode';
 
 function getYesterdayISO() {
   const date = new Date();
@@ -23,6 +24,7 @@ function getYesterdayISO() {
 export default function AddTransactionPage() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const offline = useOfflineMode();
   const isEdit = Boolean(id);
   const transactions = useTransactionStore((state) => state.transactions);
   const addTransaction = useTransactionStore((state) => state.addTransaction);
@@ -106,6 +108,25 @@ export default function AddTransactionPage() {
               Kembali ke Riwayat
             </Link>
           </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (offline) {
+    return (
+      <div className="page add-page">
+        <div className="card">
+          <EmptyState
+            icon={<WifiOff size={40} />}
+            title="Mode baca saja"
+            text="Membuat atau mengubah transaksi butuh koneksi internet. Data yang tersimpan tetap bisa dibaca."
+            action={
+              <Link to="/" className="btn btn--primary">
+                Kembali ke Dasbor
+              </Link>
+            }
+          />
         </div>
       </div>
     );

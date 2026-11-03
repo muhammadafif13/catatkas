@@ -9,6 +9,7 @@ import { toast, useUIStore } from '../stores/useUIStore';
 import { formatSignedCurrency } from '../utils/formatCurrency';
 import { formatDateTime, formatDayDate } from '../utils/formatDate';
 import { getErrorMessage, hexToRgba } from '../utils/helpers';
+import { useOfflineMode } from '../hooks/useOfflineMode';
 
 export default function TransactionDetailPage() {
   const { id } = useParams();
@@ -94,11 +95,22 @@ export default function TransactionDetailPage() {
       </section>
 
       <div className="detail-actions">
-        <Link to={`/transaction/${transaction.id}/edit`} className="btn btn--primary">
+        <Link
+          to={`/transaction/${transaction.id}/edit`}
+          className={`btn btn--primary ${offline ? 'btn--disabled' : ''}`}
+          aria-disabled={offline || undefined}
+          onClick={offline ? (e) => { e.preventDefault(); toast.info('Edit butuh koneksi internet saat offline.'); } : undefined}
+        >
           <Pencil aria-hidden="true" />
           Edit Transaksi
         </Link>
-        <button type="button" className="btn btn--danger-soft" onClick={handleDelete}>
+        <button
+          type="button"
+          className={`btn btn--danger-soft ${offline ? 'btn--disabled' : ''}`}
+          onClick={offline ? () => toast.info('Hapus butuh koneksi internet saat offline.') : handleDelete}
+          disabled={offline}
+          aria-disabled={offline || undefined}
+        >
           <Trash2 aria-hidden="true" />
           Hapus
         </button>

@@ -30,6 +30,38 @@ export function isOnline() {
   return typeof navigator === 'undefined' || navigator.onLine !== false;
 }
 
+export function isNetworkError(error) {
+  if (!error) return false;
+  const msg = String(error?.message || error || '').toLowerCase();
+  return (
+    msg.includes('fetch') ||
+    msg.includes('network') ||
+    msg.includes('offline') ||
+    msg.includes('failed to fetch') ||
+    msg.includes('typeerror') ||
+    msg.includes('connect')
+  );
+}
+
+export async function checkServerOnline() {
+  if (!isOnline()) return false;
+  try {
+    const ctrl = new AbortController();
+    const timeoutId = setTimeout(() => ctrl.abort(), 3000);
+    const res = await fetch(`${supabaseUrl}/rest/v1/profiles?select=id&limit=1`, {
+      headers: {
+        apikey: supabaseAnonKey,
+        Authorization: `Bearer ${supabaseAnonKey}`,
+      },
+      signal: ctrl.signal,
+    });
+    clearTimeout(timeoutId);
+    return res.ok || res.status === 401 || res.status === 403;
+  } catch {
+    return false;
+  }
+}
+
 export function assertOnline() {
   if (!isOnline()) {
     throw new Error('Kamu sedang offline. Sambungkan internet untuk menyimpan perubahan.');
