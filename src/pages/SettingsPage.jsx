@@ -20,12 +20,15 @@ import {
   Wallet,
 } from 'lucide-react';
 import ProgressBar from '../components/ui/ProgressBar';
+import { useAdFreeActive } from '../hooks/useAdFreeActive';
 import { usePWAInstall } from '../hooks/usePWAInstall';
 import { useStorageEstimate } from '../hooks/useStorageEstimate';
 import { clearAllData, restoreDatabaseSnapshot } from '../db/backup';
 import { getLegacySnapshot, hasLegacyData } from '../db/legacy';
+import { isAdMobSupported } from '../services/admob';
 import { adsenseClient } from '../lib/supabase';
 import { useAccountStore } from '../stores/useAccountStore';
+import { useAdMobStore } from '../stores/useAdMobStore';
 import { useAuthStore } from '../stores/useAuthStore';
 import { useConsentStore } from '../stores/useConsentStore';
 import { useSettingsStore } from '../stores/useSettingsStore';
@@ -63,6 +66,10 @@ export default function SettingsPage() {
   const grantAdsense = useConsentStore((state) => state.grantAdsense);
   const denyAdsense = useConsentStore((state) => state.denyAdsense);
   const resetAdsenseConsent = useConsentStore((state) => state.resetAdsenseConsent);
+  const adMobStatus = useAdMobStore((state) => state.status);
+  const adMobCanRequestAds = useAdMobStore((state) => state.canRequestAds);
+  const openAdMobPrivacyOptions = useAdMobStore((state) => state.openPrivacyOptions);
+  const adMobAdFree = useAdFreeActive();
   const requestConfirm = useUIStore((state) => state.requestConfirm);
   const { canInstall, isInstalled, install } = usePWAInstall();
   const storage = useStorageEstimate();
@@ -72,6 +79,7 @@ export default function SettingsPage() {
   const [sendingReset, setSendingReset] = useState(false);
   const [legacyAvailable, setLegacyAvailable] = useState(false);
   const [importingLegacy, setImportingLegacy] = useState(false);
+  const [openingPrivacy, setOpeningPrivacy] = useState(false);
 
   useEffect(() => {
     setThreshold(settings.budgetAlertThreshold);
@@ -171,6 +179,24 @@ export default function SettingsPage() {
       toast.error(getErrorMessage(error));
     } finally {
       setImportingLegacy(false);
+    }
+  };
+
+  const handleOpenPrivacyOptions = async () => {
+    if (!isAdMobSupported) return;
+    setOpeningPrivacy(true);
+    try {
+      const snapshot = await openAdMobPrivacyOptions();
+      if (snapshot.canRequestAds) {
+        toast.success('Preferensi iklan diperbarui.');
+      } else {
+        toast.info('Iklan Google dinonaktifkan sesuai pilihanmu.');
+      }
+    } catch (error) {
+      console.warn('Unable to open AdMob privacy options:', error);
+      toast.error('Preferensi iklan belum tersedia. Coba lagi nanti.');
+    } finally {
+      setOpeningPrivacy(false);
     }
   };
 
@@ -403,51 +429,79 @@ export default function SettingsPage() {
             Iklan & privasi
           </h2>
           <p className="settings-section__description">
-            Iklan sponsor tetap tampil tanpa cookie. Google AdSense hanya dimuat setelah kamu
-            memberi izin.
+            {isAdMobSupported
+              ? 'CatatKas memakai Google AdMob di aplikasi Android. Iklan Google hanya dimuat setelah preferensi yang diperlukan tersedia.'
+              : 'Iklan sponsor tetap tampil tanpa cookie. Google AdSense hanya dimuat setelah kamu memberi izin.'}
           </p>
         </div>
-        <div className="setting-row">
-          <div>
-            <div className="setting-row__label">Izin iklan Google</div>
-            <div className="setting-row__description">
-              {!adsenseClient
-                ? 'AdSense belum dikonfigurasi untuk aplikasi ini.'
-                : adsenseConsent === 'granted'
-                  ? 'Diizinkan. Google dapat memakai cookie untuk menampilkan iklan yang relevan.'
-                  : adsenseConsent === 'denied'
-                    ? 'Hanya iklan sponsor. Iklan Google tidak dimuat.'
-                    : 'Belum dipilih. Kamu akan ditanya saat slot AdSense tersedia.'}
+
+        {isAdMobSupported ? (
+          <div className="setting-row">
+            <div>
+              <div className="setting-row__label">Izin iklan Google AdMob</div>
+              <div className="setting-row__description">
+                {adMobStatus === 'initializing'
+                  ? 'Memeriksa preferensi iklan…'
+                  : adMobCanRequestAds
+                    ? 'Iklan Google diizinkan. Kamu dapat mengubah pilihan kapan saja.'
+                    : 'Iklan Google belum diizinkan. Iklan sponsor tetap dapat tampil.'}
+                {adMobAdFree ? ' Bebas iklan Google sedang aktif.' : ''}
+              </div>
+            </div>
+            <div className="setting-row__control">
+              <button
+                type="button"
+                className="btn btn--soft btn--sm"
+                onClick={handleOpenPrivacyOptions}
+                disabled={openingPrivacy || adMobStatus === 'initializing'}
+              >
+                {openingPrivacy ? 'Membuka…' : 'Kelola preferensi iklan'}
+              </button>
             </div>
           </div>
-          <div className="setting-row__control">
-            <div className="settings-inline-actions">
-              {adsenseConsent === 'granted' ? (
-                <button type="button" className="btn btn--ghost btn--sm" onClick={denyAdsense}>
-                  Batalkan izin
-                </button>
-              ) : (
-                <button
-                  type="button"
-                  className="btn btn--soft btn--sm"
-                  onClick={grantAdsense}
-                  disabled={!adsenseClient}
-                >
-                  Izinkan AdSense
-                </button>
-              )}
-              {adsenseConsent ? (
-                <button
-                  type="button"
-                  className="btn btn--ghost btn--sm"
-                  onClick={resetAdsenseConsent}
-                >
-                  Atur ulang
-                </button>
-              ) : null}
+        ) : (
+          <div className="setting-row">
+            <div>
+              <div className="setting-row__label">Izin iklan Google</div>
+              <div className="setting-row__description">
+                {!adsenseClient
+                  ? 'AdSense belum dikonfigurasi untuk aplikasi ini.'
+                  : adsenseConsent === 'granted'
+                    ? 'Diizinkan. Google dapat memakai cookie untuk menampilkan iklan yang relevan.'
+                    : adsenseConsent === 'denied'
+                      ? 'Hanya iklan sponsor. Iklan Google tidak dimuat.'
+                      : 'Belum dipilih. Kamu akan ditanya saat slot AdSense tersedia.'}
+              </div>
+            </div>
+            <div className="setting-row__control">
+              <div className="settings-inline-actions">
+                {adsenseConsent === 'granted' ? (
+                  <button type="button" className="btn btn--ghost btn--sm" onClick={denyAdsense}>
+                    Batalkan izin
+                  </button>
+                ) : (
+                  <button
+                    type="button"
+                    className="btn btn--soft btn--sm"
+                    onClick={grantAdsense}
+                    disabled={!adsenseClient}
+                  >
+                    Izinkan AdSense
+                  </button>
+                )}
+                {adsenseConsent ? (
+                  <button
+                    type="button"
+                    className="btn btn--ghost btn--sm"
+                    onClick={resetAdsenseConsent}
+                  >
+                    Atur ulang
+                  </button>
+                ) : null}
+              </div>
             </div>
           </div>
-        </div>
+        )}
       </section>
 
       <section className="settings-section">

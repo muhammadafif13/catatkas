@@ -4,4 +4,5 @@
     <string name="title_activity_main">CatatKas</string>
     <string name="package_name">com.catatkas.app</string>
     <string name="custom_url_scheme">com.catatkas.app</string>
+    <string name="admob_app_id" translatable="false">ca-app-pub-5733196874007773~5646834414</string>
 </resources>

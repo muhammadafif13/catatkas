@@ -10,7 +10,7 @@ module.exports = {
     'plugin:react/jsx-runtime',
     'plugin:react-hooks/recommended',
   ],
-  ignorePatterns: ['dist', 'node_modules', 'public', 'scripts'],
+  ignorePatterns: ['dist', 'node_modules', 'public', 'scripts', 'android'],
   parserOptions: {
     ecmaVersion: 'latest',
     sourceType: 'module',

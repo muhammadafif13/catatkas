@@ -1,6 +1,7 @@
 import { Suspense, useEffect } from 'react';
 import { Link, Outlet, useLocation } from 'react-router-dom';
 import { Plus } from 'lucide-react';
+import AdMobBanner from '../ads/AdMobBanner';
 import BottomNav from './BottomNav';
 import ConnectionBanner from './ConnectionBanner';
 import Header from './Header';
@@ -9,6 +10,7 @@ import ConfirmDialog from '../ui/ConfirmDialog';
 import LoadingSpinner from '../ui/LoadingSpinner';
 import PWAInstallBanner from '../ui/PWAInstallBanner';
 import ToastContainer from '../ui/ToastContainer';
+import { useAdMobLifecycle } from '../../hooks/useAdMobLifecycle';
 
 function ScrollToTop() {
   const { pathname } = useLocation();
@@ -21,6 +23,8 @@ function ScrollToTop() {
 }
 
 export default function AppLayout() {
+  useAdMobLifecycle();
+
   return (
     <div className="app-shell">
       <ScrollToTop />
@@ -36,6 +40,7 @@ export default function AppLayout() {
         </main>
       </div>
       <BottomNav />
+      <AdMobBanner />
       <Link to="/add" className="fab" aria-label="Tambah transaksi baru">
         <Plus size={25} aria-hidden="true" />
       </Link>

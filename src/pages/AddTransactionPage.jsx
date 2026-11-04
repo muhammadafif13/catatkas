@@ -5,11 +5,13 @@ import AmountInput from '../components/forms/AmountInput';
 import CategoryPicker from '../components/forms/CategoryPicker';
 import FormField from '../components/forms/FormField';
 import TypeToggle from '../components/forms/TypeToggle';
+import EmptyState from '../components/ui/EmptyState';
 import { useAccountStore } from '../stores/useAccountStore';
 import { useCategoryStore } from '../stores/useCategoryStore';
 import { useSettingsStore } from '../stores/useSettingsStore';
 import { useTransactionStore } from '../stores/useTransactionStore';
 import { toast } from '../stores/useUIStore';
+import { handleAdMobTransactionSaved } from '../services/admob';
 import { getErrorMessage } from '../utils/helpers';
 import { nowTime, toISODate, todayISO } from '../utils/formatDate';
 import { validateTransaction } from '../utils/validation';
@@ -156,6 +158,9 @@ export default function AddTransactionPage() {
         await addTransaction(payload);
         toast.success('Transaksi berhasil disimpan.');
         navigate('/', { replace: true });
+        window.setTimeout(() => {
+          void handleAdMobTransactionSaved();
+        }, 350);
       }
     } catch (error) {
       toast.error(getErrorMessage(error));

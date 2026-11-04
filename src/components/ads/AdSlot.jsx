@@ -1,10 +1,14 @@
 import { useEffect, useMemo, useState } from 'react';
 import { ArrowUpRight, Megaphone, Sparkles } from 'lucide-react';
 import AdConsentPrompt from './AdConsentPrompt';
+import AdMobNative from './AdMobNative';
 import AdSenseUnit from './AdSenseUnit';
 import { getAdImageUrl, recordAdEvent } from '../../db/ads';
+import { useAdFreeActive } from '../../hooks/useAdFreeActive';
 import { useOnlineStatus } from '../../hooks/useOnlineStatus';
+import { isAdMobNativeEnabled, isAdMobSupported } from '../../services/admob';
 import { useAdStore } from '../../stores/useAdStore';
+import { useAuthStore } from '../../stores/useAuthStore';
 import { useConsentStore } from '../../stores/useConsentStore';
 
 const IMPRESSION_KEY = 'catatkas.adImpressions.v1';
@@ -98,6 +102,8 @@ function SponsorAd({ ad }) {
 export default function AdSlot({ placement, allowConsentPrompt = false, className = '' }) {
   const online = useOnlineStatus();
   const ads = useAdStore((state) => state.ads);
+  const profile = useAuthStore((state) => state.profile);
+  const adFree = useAdFreeActive();
   const consent = useConsentStore((state) => state.adsenseConsent);
   const sponsors = useMemo(
     () => ads.filter((ad) => ad.placement === placement && ad.provider === 'sponsor'),
@@ -118,16 +124,24 @@ export default function AdSlot({ placement, allowConsentPrompt = false, classNam
   }, [placement, sponsors.length]);
 
   if (!online) return null;
+  if (profile?.role === 'admin') return null;
 
   const sponsor = sponsors.length ? sponsors[rotationIndex % sponsors.length] : null;
 
-  // Paid sponsors always take precedence over AdSense in the same slot.
+  // Paid sponsors always take precedence over Google inventory in the same slot.
   if (sponsor) {
     return (
       <section className={`ad-slot ${className}`.trim()} aria-label="Iklan sponsor">
         <SponsorAd ad={sponsor} />
       </section>
     );
+  }
+
+  // AdMob is the correct Google inventory for the native Android app. AdSense
+  // remains available for the web/PWA build only.
+  if (isAdMobSupported) {
+    if (adFree || !isAdMobNativeEnabled) return null;
+    return <AdMobNative placement={placement} className={className} />;
   }
 
   if (adsense && consent === 'granted') {

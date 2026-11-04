@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom';
 import { ChevronRight, Cloud, Download, ShieldCheck, ShieldHalf, Smartphone } from 'lucide-react';
+import AdMobRewardCard from '../components/ads/AdMobRewardCard';
 import AdSlot from '../components/ads/AdSlot';
 import PageIntro from '../components/ui/PageIntro';
 import { usePWAInstall } from '../hooks/usePWAInstall';
@@ -50,6 +51,8 @@ export default function MorePage() {
       </Link>
 
       <AdSlot placement="more" />
+
+      <AdMobRewardCard />
 
       <section className="card">
         <nav className="more-nav" aria-label="Menu lainnya">

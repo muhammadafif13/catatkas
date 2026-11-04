@@ -41,7 +41,7 @@ const sections = [
     id: 'iklan-dan-pengukuran',
     icon: Megaphone,
     title: 'Iklan dan pengukuran',
-    body: 'Iklan sponsor, termasuk iklan berbayar dari pengiklan publik, ditampilkan tanpa mengirim data keuanganmu. Jika iklan Google AdSense diaktifkan dan kamu memberi persetujuan, Google dapat memakai cookie atau pengenal iklan sesuai kebijakannya. CatatKas hanya menyimpan jumlah tayangan dan klik agregat tanpa mengaitkannya ke identitas pengguna.',
+    body: 'Iklan sponsor, termasuk iklan berbayar dari pengiklan publik, ditampilkan tanpa mengirim data keuanganmu. Di aplikasi Android, CatatKas memakai Google AdMob (Google Mobile Ads SDK). Setelah preferensi iklan yang diperlukan diberikan melalui Google User Messaging Platform, Google dapat memakai pengenal perangkat atau iklan, alamat IP, perkiraan lokasi, dan data interaksi iklan untuk menampilkan serta mengukur iklan sesuai kebijakannya. Di web/PWA, Google AdSense hanya dimuat setelah kamu memberi persetujuan. Data keuanganmu tidak dibagikan kepada pengiklan. CatatKas hanya menyimpan jumlah tayangan dan klik agregat tanpa mengaitkannya ke identitas pengguna.',
   },
   {
     id: 'pengiklan-publik',
@@ -92,7 +92,7 @@ export default function PrivacyPage() {
           </div>
           <div className="privacy-hero__meta">
             <span className="privacy-hero__meta-label">Terakhir diperbarui</span>
-            <time dateTime="2026-10-28">28 Oktober 2026</time>
+            <time dateTime="2026-11-04">4 November 2026</time>
           </div>
         </section>
 

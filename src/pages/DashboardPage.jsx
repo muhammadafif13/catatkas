@@ -148,6 +148,8 @@ export default function DashboardPage() {
         </section>
       </div>
 
+      <AdSlot placement="dashboard" />
+
       <div className="dashboard-grid dashboard-grid--lower">
         <section className="card">
           <div className="card__header">

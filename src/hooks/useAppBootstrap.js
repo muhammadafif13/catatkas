@@ -9,7 +9,6 @@ export function useAppBootstrap() {
   const status = useAuthStore((state) => state.status);
   const error = useAuthStore((state) => state.error);
   const retry = useAuthStore((state) => state.retry);
-  const setOfflineMode = useAuthStore((state) => state.setOfflineMode);
 
   useEffect(() => {
     void useAuthStore.getState().initialize();

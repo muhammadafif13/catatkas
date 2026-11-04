@@ -11,6 +11,7 @@ CatatKas adalah PWA pencatatan keuangan pribadi multi-user. Data utama disimpan 
 - Chart.js
 - Supabase Auth, Postgres, Row Level Security, Storage, dan Edge Functions
 - vite-plugin-pwa / Workbox
+- Capacitor 8 + Google AdMob (`@capacitor-community/admob`) untuk APK Android
 
 ## Fitur
 
@@ -47,9 +48,27 @@ CatatKas adalah PWA pencatatan keuangan pribadi multi-user. Data utama disimpan 
 
 - Placement: beranda, riwayat, laporan, dan menu lainnya
 - Sponsor memakai gambar yang diunggah admin atau kreatif pengiklan publik
-- AdSense hanya dimuat setelah pengguna memberi persetujuan
+- Di web/PWA, AdSense hanya dimuat setelah pengguna memberi persetujuan
+- Di APK Android, Google AdMob menggantikan AdSense; AdSense tidak dimuat di WebView
 - Statistik tayangan/klik disimpan agregat tanpa identitas pengguna
 - Formulir publik dilindungi rate limit hash IP/email, honeypot, dan opsional Cloudflare Turnstile
+
+### Google AdMob (Android)
+
+- App ID AdMob: `ca-app-pub-5733196874007773~5646834414`
+- Format yang dipakai: App Open, Banner, Interstitial, Native Advanced, Rewarded, dan Rewarded Interstitial
+- Banner hanya tampil di halaman sekunder `/budget`, `/accounts`, `/categories`, dan `/export`
+- Native Advanced tampil di slot iklan beranda, riwayat, laporan, dan menu lainnya; sponsor berbayar tetap diprioritaskan
+- Rewarded memberi bebas iklan Google 24 jam; Rewarded Interstitial memberi 48 jam
+- App Open dan Interstitial memakai batas frekuensi agar tidak mengganggu; keduanya tidak dimuat untuk akun admin
+- Iklan Google tetap disembunyikan saat bebas iklan aktif, saat offline, atau ketika dialog konfirmasi terbuka
+- Persetujuan UMP ditangani melalui Google User Messaging Platform sebelum SDK meminta iklan
+- Pengguna dapat membuka ulang preferensi iklan dari **Pengaturan → Iklan & privasi**
+
+Saat mengembangkan APK, set `VITE_ADMOB_TEST_MODE=true` agar seluruh unit memakai unit demo Google.
+Jangan pernah menguji dengan unit produksi karena berisiko invalid traffic. Jika overlay Native Advanced
+bermasalah pada perangkat tertentu, set `VITE_ADMOB_NATIVE_ENABLED=false`; slot native akan kosong dan
+sponsor tetap tampil.
 
 ### Alur iklan self-service
 
@@ -150,6 +169,8 @@ Fungsi ini hanya dapat dijalankan dengan akses service role dan tidak tersedia u
 | `VITE_SUPABASE_URL` | Ya | URL project Supabase |
 | `VITE_SUPABASE_ANON_KEY` | Ya | Anon/publishable key |
 | `VITE_ADSENSE_CLIENT` | Tidak | Publisher ID AdSense, contoh `ca-pub-...` |
+| `VITE_ADMOB_TEST_MODE` | Tidak | `true` untuk memakai unit demo AdMob saat build APK uji |
+| `VITE_ADMOB_NATIVE_ENABLED` | Tidak | Default `true`; set `false` untuk mematikan Native Advanced |
 | `VITE_TURNSTILE_SITE_KEY` | Tidak | Site key Cloudflare Turnstile untuk formulir publik |
 | `TURNSTILE_SECRET_KEY` | Tidak | Secret Edge Function; wajib jika site key diisi |
 | `RATE_LIMIT_SALT` | Tidak | Salt hash rate limit; fallback ke service role key |
@@ -195,7 +216,42 @@ Jangan menaruh service role key di variabel `VITE_*`. File `.env.local`, `supaba
 5. Konfigurasikan SPA rewrite semua route ke `/index.html`. Aplikasi memakai BrowserRouter.
 6. Aktifkan HTTPS agar service worker dan PWA dapat berjalan.
 7. Untuk AdSense, isi `VITE_ADSENSE_CLIENT`, siapkan slot, dan publikasikan `ads.txt`.
-8. Atur SMTP production agar email reset password terkirim.
+8. Untuk AdMob, ikuti langkah pada bagian **Build Android dan AdMob** di bawah.
+9. Atur SMTP production agar email reset password terkirim.
+
+## Build Android dan AdMob
+
+Prasyarat: Android Studio/JDK yang kompatibel dengan compileSdk 36 dan Node.js 22+.
+
+1. Daftarkan aplikasi di AdMob dan buat enam unit iklan: App Open, Banner, Interstitial, Native Advanced, Rewarded, dan Rewarded Interstitial.
+2. Masukkan App ID ke `android/app/src/main/res/values/strings.xml` dan pastikan meta-data `com.google.android.gms.ads.APPLICATION_ID` ada di `AndroidManifest.xml`.
+3. Ganti unit ID produksi di `src/services/admob.js` hanya jika unit AdMob berubah. Unit demo Google dipakai otomatis saat `VITE_ADMOB_TEST_MODE=true`.
+4. Build web, sinkronkan Capacitor, lalu build APK:
+
+   ```bash
+   npm run build
+   npx cap sync android
+   cd android
+   ./gradlew assembleDebug
+   ```
+
+   Di Windows PowerShell gunakan `.\gradlew.bat assembleDebug`. Hasil debug APK ada di
+   `android/app/build/outputs/apk/debug/app-debug.apk`.
+
+5. Untuk rilis, matikan mode uji (`VITE_ADMOB_TEST_MODE=false`), build ulang web, lalu jalankan
+   `npx cap sync android` sebelum membuat APK/AAB release yang ditandatangani.
+6. Publikasikan `public/app-ads.txt` di root domain developer yang tercantum pada listing Play Store,
+   misalnya `https://catatkas.example/app-ads.txt`. File ini juga disalin ke `dist/` saat build.
+   `public/ads.txt` dipakai untuk AdSense di web. Tunggu verifikasi Google setelah domain aktif.
+7. Perbarui **Play Console → App content → Data safety** dan kebijakan privasi: nyatakan bahwa Google
+   Mobile Ads SDK dapat mengumpulkan ID perangkat/iklan, alamat IP, perkiraan lokasi, dan interaksi
+   iklan untuk personalisasi serta pengukuran, dan bahwa pengguna dapat mengubah preferensi lewat UMP.
+8. Uji di perangkat/emulator: banner tidak menutupi navigasi bawah, native ad tidak menutupi header atau
+   dialog, batas App Open/Interstitial bekerja, reward 24/48 jam tersimpan, dan akun admin tidak melihat iklan.
+
+Catatan kebijakan: jangan menempatkan iklan di layar yang memblokir navigasi, jangan meminta klik, dan
+jangan memakai unit produksi untuk pengujian internal. Penayangan iklan juga harus mengikuti kebijakan
+Google AdMob serta persetujuan yang berlaku di wilayah pengguna.
 
 ## Struktur
 

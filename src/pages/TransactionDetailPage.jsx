@@ -18,6 +18,7 @@ export default function TransactionDetailPage() {
   const removeTransaction = useTransactionStore((state) => state.deleteTransaction);
   const categories = useCategoryStore((state) => state.categories);
   const accounts = useAccountStore((state) => state.accounts);
+  const offline = useOfflineMode();
   const requestConfirm = useUIStore((state) => state.requestConfirm);
 
   const transaction = transactions.find((item) => item.id === Number(id));
