@@ -132,6 +132,10 @@
   letter-spacing: -0.02em;
 }
 
+.privacy-hero__meta time + .privacy-hero__meta-label {
+  margin-top: 0.55rem;
+}
+
 .privacy-body {
   display: grid;
   grid-template-columns: 200px minmax(0, 1fr);
@@ -232,12 +236,75 @@
   letter-spacing: -0.025em;
 }
 
+.privacy-section__num {
+  margin-right: 0.55rem;
+  color: var(--color-primary-300);
+  font-size: 0.72em;
+  font-variant-numeric: tabular-nums;
+}
+
 .privacy-section__body p {
   max-width: 66ch;
   margin-top: 0.55rem;
   color: var(--text-secondary);
   font-size: 0.9375rem;
   line-height: 1.78;
+}
+
+.privacy-section__list {
+  display: grid;
+  gap: 0.4rem;
+  max-width: 66ch;
+  margin-top: 0.65rem;
+  padding-left: 1.15rem;
+}
+
+.privacy-section__list li {
+  color: var(--text-secondary);
+  font-size: 0.9375rem;
+  line-height: 1.72;
+}
+
+.privacy-section__list li::marker {
+  color: var(--color-primary-400);
+}
+
+.privacy-section__note {
+  max-width: 66ch;
+  margin-top: 0.85rem !important;
+  padding: 0.8rem 1rem;
+  background: var(--color-primary-soft);
+  border: 1px solid var(--color-primary-border);
+  border-radius: var(--radius-lg);
+  font-size: 0.875rem !important;
+}
+
+.privacy-contact {
+  max-width: 66ch;
+  margin-top: 1rem;
+  padding: 1rem 1.1rem;
+  background: var(--bg-subtle);
+  border: 1px solid var(--border-primary);
+  border-radius: var(--radius-lg);
+}
+
+.privacy-contact p {
+  margin: 0;
+  font-size: 0.9rem;
+  line-height: 1.65;
+}
+
+.privacy-contact p + p {
+  margin-top: 0.2rem;
+}
+
+.privacy-contact strong {
+  color: var(--text-primary);
+}
+
+.privacy-contact a {
+  color: var(--color-primary-300);
+  word-break: break-word;
 }
 
 .privacy-note {
@@ -294,7 +361,8 @@
 }
 
 [data-theme='light'] .privacy-kicker,
-[data-theme='light'] .privacy-section__icon {
+[data-theme='light'] .privacy-section__icon,
+[data-theme='light'] .privacy-section__num {
   color: var(--color-primary-600);
 }
 
@@ -312,6 +380,10 @@
     padding: 1rem 0 0;
     border-top: 1px solid var(--border-primary);
     border-left: 0;
+  }
+
+  .privacy-hero__meta time + .privacy-hero__meta-label {
+    margin-top: 0;
   }
 
   .privacy-body {
@@ -400,7 +472,8 @@
     font-size: 1.1rem;
   }
 
-  .privacy-section__body p {
+  .privacy-section__body p,
+  .privacy-section__list li {
     font-size: 0.9rem;
     line-height: 1.7;
   }
