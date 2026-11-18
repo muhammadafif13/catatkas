@@ -144,9 +144,9 @@ Layanan lokal:
 | Layanan | URL |
 |---|---|
 | Aplikasi | `http://localhost:5173` |
-| Supabase API | `http://127.0.0.1:55321` |
-| Supabase Studio | `http://127.0.0.1:55323` |
-| Mailpit | `http://127.0.0.1:55324` |
+| Supabase API | `http://127.0.0.1:54321` |
+| Supabase Studio | `http://127.0.0.1:54323` |
+| Mailpit | `http://127.0.0.1:54324` |
 
 Email reset password tidak dikirim keluar saat development; buka Mailpit untuk mengambil tautannya. Signup tidak mengirim email verifikasi dan akun langsung aktif.
 
