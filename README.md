@@ -203,7 +203,7 @@ Jangan menaruh service role key di variabel `VITE_*`. File `.env.local`, `supaba
    ```bash
    npx supabase link --project-ref <project-ref>
    npx supabase db push
-   npx supabase functions deploy
+   npx supabase functions deploy --use-api
    npx supabase secrets set TURNSTILE_SECRET_KEY=... RATE_LIMIT_SALT=...
    ```
 
@@ -218,6 +218,8 @@ Jangan menaruh service role key di variabel `VITE_*`. File `.env.local`, `supaba
 7. Untuk AdSense, isi `VITE_ADSENSE_CLIENT`, siapkan slot, dan publikasikan `ads.txt`.
 8. Untuk AdMob, ikuti langkah pada bagian **Build Android dan AdMob** di bawah.
 9. Atur SMTP production agar email reset password terkirim.
+
+Panduan lengkap untuk VPS + Supabase Cloud (Nginx/Apache, rilis, rollback, dan checklist verifikasi) ada di [`deploy/README.md`](deploy/README.md).
 
 ## Build Android dan AdMob
 
