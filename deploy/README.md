@@ -37,7 +37,7 @@ Jalankan dari laptop (lebih mudah karena login browser) atau VPS dengan `SUPABAS
 ```bash
 npx supabase login
 npx supabase link --project-ref <PROJECT_REF>
-npx supabase db push
+npx supabase db push --db-url "$SUPABASE_DB_URL"
 npx supabase functions deploy --use-api
 npx supabase secrets set TURNSTILE_SECRET_KEY=<secret> RATE_LIMIT_SALT=<random-string>
 ```
@@ -48,6 +48,13 @@ Catatan:
 - `--use-api` membundel Edge Functions di server Supabase, jadi **Docker tidak diperlukan**.
 - Tanpa Turnstile, `TURNSTILE_SECRET_KEY` boleh dikosongkan; rate limit dan honeypot tetap berjalan.
 - Jangan set `SUPABASE_SERVICE_ROLE_KEY` sebagai secret function; nilainya sudah tersedia otomatis.
+- Untuk `--db-url`, pakai **session pooler** (port **5432**), bukan host `db.<ref>.supabase.co`:
+  ```bash
+  postgresql://postgres.<PROJECT_REF>:<DB_PASSWORD>@aws-1-<REGION>.pooler.supabase.com:5432/postgres
+  ```
+  Host `db.<ref>.supabase.co` hanya IPv6 sehingga sering gagal dari jaringan tanpa IPv6. Transaction
+  pooler (port 6543) tidak mendukung DDL, jadi jangan dipakai untuk migrasi. Simpan nilainya di
+  `.env.db.local` (diabaikan git) dengan nama `SUPABASE_DB_URL`.
 
 ### Pengaturan Auth
 
@@ -168,7 +175,7 @@ npm run build
 Migrasi baru:
 
 ```bash
-npx supabase db push
+npx supabase db push --db-url "$SUPABASE_DB_URL"
 npx supabase functions deploy --use-api
 ```
 

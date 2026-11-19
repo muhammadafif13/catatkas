@@ -174,9 +174,16 @@ Fungsi ini hanya dapat dijalankan dengan akses service role dan tidak tersedia u
 | `VITE_TURNSTILE_SITE_KEY` | Tidak | Site key Cloudflare Turnstile untuk formulir publik |
 | `TURNSTILE_SECRET_KEY` | Tidak | Secret Edge Function; wajib jika site key diisi |
 | `RATE_LIMIT_SALT` | Tidak | Salt hash rate limit; fallback ke service role key |
+| `SUPABASE_DB_URL` | Tidak | Koneksi Postgres untuk CLI/migrasi; pakai session pooler port 5432 |
 
-Jangan menaruh service role key di variabel `VITE_*`. File `.env.local`, `supabase/functions/.env`, dan
-`.env.admin.local` tidak boleh di-commit.
+Jangan menaruh service role key di variabel `VITE_*`. File `.env.local`, `.env.db.local`, `supabase/functions/.env`,
+dan `.env.admin.local` tidak boleh di-commit.
+
+`SUPABASE_DB_URL` hanya dipakai perintah CLI, bukan oleh aplikasi. Format session pooler:
+
+```bash
+postgresql://postgres.<project-ref>:<db-password>@aws-1-<region>.pooler.supabase.com:5432/postgres
+```
 
 ## Perintah
 
@@ -202,10 +209,15 @@ Jangan menaruh service role key di variabel `VITE_*`. File `.env.local`, `supaba
 
    ```bash
    npx supabase link --project-ref <project-ref>
-   npx supabase db push
+   npx supabase db push --db-url "$SUPABASE_DB_URL"
    npx supabase functions deploy --use-api
    npx supabase secrets set TURNSTILE_SECRET_KEY=... RATE_LIMIT_SALT=...
    ```
+
+   Isi `SUPABASE_DB_URL` di `.env.db.local` (diabaikan git) memakai session pooler
+   `postgresql://postgres.<project-ref>:<db-password>@aws-1-<region>.pooler.supabase.com:5432/postgres`.
+   Host `db.<project-ref>.supabase.co` hanya IPv6 sehingga sering gagal dari jaringan tanpa IPv6;
+   jangan pakai transaction pooler (port 6543) untuk migrasi.
 
    Isi secret Turnstile hanya jika `VITE_TURNSTILE_SITE_KEY` dipakai. Deploy `functions` akan
    mengirim seluruh function, termasuk empat function publik iklan.
