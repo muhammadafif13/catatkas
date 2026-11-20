@@ -191,3 +191,40 @@ npx supabase functions deploy --use-api
 ## 10. Catatan PHP 7.4
 
 Domain CatatKas hanya menyajikan file statis. Tidak ada konfigurasi PHP, `mod_php`, atau PHP-FPM yang diperlukan. Kalau VPS memakai cPanel, tempatkan hasil build di `public_html` atau subdomain, dan pastikan domain tersebut tidak menjalankan aplikasi PHP.
+
+## 11. Halaman privacy di domain terpisah
+
+Kebijakan privasi bisa dipisahkan dari aplikasi, misalnya di `https://catatkas.aniwall.my.id`.
+Ini URL yang dipakai untuk listing Play Console, jadi harus dapat diakses publik tanpa login.
+
+```bash
+# di VPS
+sudo mkdir -p /var/www/catatkas-privacy
+sudo chown -R $USER:$USER /var/www/catatkas-privacy
+
+# dari laptop, upload satu file HTML + file verifikasi iklan
+scp privacy-site/index.html user@VPS:/var/www/catatkas-privacy/
+scp public/app-ads.txt public/ads.txt user@VPS:/var/www/catatkas-privacy/
+
+# di VPS
+sudo chown -R www-data:www-data /var/www/catatkas-privacy
+sudo cp deploy/nginx/privacy-site.conf /etc/nginx/sites-available/catatkas-privacy.conf
+sudo ln -s /etc/nginx/sites-available/catatkas-privacy.conf /etc/nginx/sites-enabled/
+sudo nginx -t && sudo systemctl reload nginx
+sudo certbot --nginx -d catatkas.aniwall.my.id
+```
+
+Verifikasi:
+
+```bash
+curl -I https://catatkas.aniwall.my.id
+curl -I https://catatkas.aniwall.my.id/app-ads.txt
+curl -s https://catatkas.aniwall.my.id | grep -c "Kebijakan Privasi"
+```
+
+Catatan:
+
+- `privacy-site/index.html` bersifat self-contained (CSS inline, tanpa aset eksternal), jadi cukup satu file.
+- `app-ads.txt` harus berada di root domain yang didaftarkan sebagai developer website di Play Console.
+  Kalau yang didaftarkan `aniwall.my.id`, file yang sama juga perlu disajikan di sana.
+- Halaman aplikasi utama tetap di domain terpisah (misalnya `app.aniwall.my.id`) dan tidak terpengaruh konfigurasi ini.
