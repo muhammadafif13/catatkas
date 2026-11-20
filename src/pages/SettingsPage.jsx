@@ -17,8 +17,11 @@ import {
   ShieldCheck,
   ShieldHalf,
   Sun,
+  Trash2,
   Wallet,
 } from 'lucide-react';
+import FormField from '../components/forms/FormField';
+import Modal from '../components/ui/Modal';
 import ProgressBar from '../components/ui/ProgressBar';
 import { useAdFreeActive } from '../hooks/useAdFreeActive';
 import { usePWAInstall } from '../hooks/usePWAInstall';
@@ -61,6 +64,7 @@ export default function SettingsPage() {
   const profile = useAuthStore((state) => state.profile);
   const accountList = useAccountStore((state) => state.accounts);
   const signOut = useAuthStore((state) => state.signOut);
+  const deleteAccount = useAuthStore((state) => state.deleteAccount);
   const requestPasswordReset = useAuthStore((state) => state.requestPasswordReset);
   const adsenseConsent = useConsentStore((state) => state.adsenseConsent);
   const grantAdsense = useConsentStore((state) => state.grantAdsense);
@@ -80,6 +84,9 @@ export default function SettingsPage() {
   const [legacyAvailable, setLegacyAvailable] = useState(false);
   const [importingLegacy, setImportingLegacy] = useState(false);
   const [openingPrivacy, setOpeningPrivacy] = useState(false);
+  const [deleteOpen, setDeleteOpen] = useState(false);
+  const [deleteEmail, setDeleteEmail] = useState('');
+  const [deleting, setDeleting] = useState(false);
 
   useEffect(() => {
     setThreshold(settings.budgetAlertThreshold);
@@ -90,6 +97,9 @@ export default function SettingsPage() {
     if (window.localStorage.getItem(LEGACY_IMPORTED_KEY) === 'true') return;
     void hasLegacyData().then(setLegacyAvailable);
   }, [profile?.role]);
+
+  const emailMatches =
+    deleteEmail.trim().toLowerCase() === String(profile?.email || '').trim().toLowerCase();
 
   const changeSetting = async (key, value) => {
     try {
@@ -125,6 +135,22 @@ export default function SettingsPage() {
       toast.error(getErrorMessage(error));
     } finally {
       setResetting(false);
+    }
+  };
+
+  const handleDeleteAccount = async () => {
+    if (!emailMatches) return;
+
+    setDeleting(true);
+    try {
+      await deleteAccount();
+      setDeleteOpen(false);
+      toast.success('Akun dihapus. Kamu sudah keluar dari CatatKas.');
+      navigate('/login', { replace: true });
+    } catch (error) {
+      toast.error(getErrorMessage(error));
+    } finally {
+      setDeleting(false);
     }
   };
 
@@ -599,7 +625,82 @@ export default function SettingsPage() {
             </button>
           </div>
         </div>
+        <div className="setting-row">
+          <div>
+            <div className="setting-row__label">Hapus akun</div>
+            <div className="setting-row__description">
+              Akun, profil, dan seluruh catatan keuangan dihapus permanen dari server. Kamu akan
+              keluar dan tidak bisa masuk lagi dengan email ini.
+            </div>
+          </div>
+          <div className="setting-row__control">
+            {profile?.role === 'admin' ? (
+              <span className="badge badge--neutral">Akun admin tidak dapat dihapus</span>
+            ) : (
+              <button
+                type="button"
+                className="btn btn--danger-soft btn--sm"
+                onClick={() => {
+                  setDeleteEmail('');
+                  setDeleteOpen(true);
+                }}
+              >
+                <Trash2 aria-hidden="true" />
+                Hapus akun
+              </button>
+            )}
+          </div>
+        </div>
       </section>
+
+      <Modal
+        open={deleteOpen}
+        title="Hapus akun permanen?"
+        description="Tindakan ini tidak bisa dibatalkan. Seluruh data keuangan, profil, dan akses login dihapus dari server CatatKas."
+        onClose={() => {
+          if (!deleting) setDeleteOpen(false);
+        }}
+        actions={
+          <>
+            <button
+              type="button"
+              className="btn btn--ghost"
+              onClick={() => setDeleteOpen(false)}
+              disabled={deleting}
+            >
+              Batal
+            </button>
+            <button
+              type="button"
+              className="btn btn--danger"
+              onClick={handleDeleteAccount}
+              disabled={!emailMatches || deleting}
+            >
+              <Trash2 aria-hidden="true" />
+              {deleting ? 'Menghapus…' : 'Hapus permanen'}
+            </button>
+          </>
+        }
+      >
+        <p className="setting-row__description">
+          Sebelum melanjutkan, ekspor backup jika kamu masih membutuhkan catatan keuangan.
+        </p>
+        <FormField
+          label={`Ketik ${profile?.email || 'email akun'} untuk konfirmasi`}
+          htmlFor="delete-account-email"
+          error={deleteEmail && !emailMatches ? 'Email tidak cocok.' : ''}
+        >
+          <input
+            id="delete-account-email"
+            className="input"
+            type="email"
+            autoComplete="off"
+            value={deleteEmail}
+            onChange={(event) => setDeleteEmail(event.target.value)}
+            disabled={deleting}
+          />
+        </FormField>
+      </Modal>
     </div>
   );
 }

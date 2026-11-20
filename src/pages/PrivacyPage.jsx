@@ -147,7 +147,7 @@ const sections = [
     id: 'hapus-akun',
     icon: Trash2,
     title: 'Menghapus akun dan data',
-    body: 'Untuk menghapus data keuangan saja, buka Pengaturan → Reset data. Tindakan ini menghapus catatan keuangan dan membuat data awal baru. Untuk menghapus akun beserta data terkait, kirim email dari alamat yang terdaftar dengan subjek “Permintaan Penghapusan Akun CatatKas”. Setelah identitas diverifikasi, akun dan data keuangan akan dihapus. Data yang wajib disimpan untuk kepatuhan hukum dapat dipertahankan untuk periode yang diperlukan.',
+    body: 'Untuk menghapus data keuangan saja, buka Pengaturan → Zona berbahaya → Hapus Semua Data. Tindakan ini menghapus catatan keuangan dan membuat data awal baru, tanpa menghapus akun. Untuk menghapus akun beserta seluruh data terkait, buka Pengaturan → Zona berbahaya → Hapus akun, lalu ketik alamat email akun sebagai konfirmasi. Kamu akan langsung keluar dan data dihapus dari server. Kalau kamu tidak bisa masuk, kirim email dari alamat yang terdaftar dengan subjek “Permintaan Penghapusan Akun CatatKas”. Setelah identitas diverifikasi, akun dan data keuangan akan dihapus. Data yang wajib disimpan untuk kepatuhan hukum dapat dipertahankan untuk periode yang diperlukan.',
     note: 'Penghapusan akun bersifat permanen. Kamu tidak dapat memulihkan transaksi, budget, atau dompet yang sudah dihapus, kecuali dari backup yang kamu unduh sendiri.',
     contact: true,
   },

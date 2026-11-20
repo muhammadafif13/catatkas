@@ -412,6 +412,9 @@ verify_jwt = false
 [functions.public-ad-proof]
 verify_jwt = false
 
+[functions.delete-account]
+verify_jwt = true
+
 [analytics]
 # Docker Desktop di Windows tidak mengekspos API daemon (port 2375), sehingga
 # container Vector (pengumpul log analytics) restart terus-menerus.

@@ -7,8 +7,10 @@ import {
 } from '../lib/offlineAuth';
 import { clearCache, prepareCacheForUser } from '../db/cache';
 import { profileFromRow } from '../services/mappers';
+import { requestAccountDeletion } from '../services/account';
 import { refreshDataStores, syncUserData } from '../services/sync';
 import { resetDataStores } from './resetDataStores';
+import { useConsentStore } from './useConsentStore';
 
 const PROFILE_CACHE_KEY = 'catatkas.profile.v2';
 let hydrateGeneration = 0;
@@ -426,6 +428,19 @@ export const useAuthStore = create((set, get) => ({
     if (supabase) {
       await supabase.auth.signOut().catch(() => {});
     }
+    await clearLocalSession();
+  },
+
+  deleteAccount: async () => {
+    if (!isSupabaseConfigured) throw new Error('Supabase belum dikonfigurasi.');
+    if (!isOnline()) throw new Error('Hapus akun membutuhkan koneksi internet.');
+
+    await requestAccountDeletion();
+
+    if (supabase) {
+      await supabase.auth.signOut({ scope: 'local' }).catch(() => {});
+    }
+    useConsentStore.getState().resetAdsenseConsent();
     await clearLocalSession();
   },
 }));

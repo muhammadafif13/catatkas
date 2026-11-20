@@ -236,5 +236,5 @@ Catatan:
 - `app-ads.txt` harus berada di root domain yang didaftarkan sebagai developer website di Play Console.
   Kalau yang didaftarkan `aniwall.my.id`, file yang sama juga perlu disajikan di sana.
 - Halaman aplikasi utama tetap di domain terpisah (misalnya `app.aniwall.my.id`) dan tidak terpengaruh konfigurasi ini.
-- Hapus akun masih diproses lewat email; Play Console mensyaratkan juga jalur hapus akun **di dalam aplikasi**,
-  sehingga menu `Pengaturan -> Hapus akun` perlu dibuat sebelum rilis berikutnya.
+- Hapus akun bisa dilakukan dari aplikasi (`Pengaturan -> Zona berbahaya -> Hapus akun`) lewat Edge Function
+  `delete-account`; jalur email di halaman publik tetap tersedia untuk pengguna yang tidak bisa login.
