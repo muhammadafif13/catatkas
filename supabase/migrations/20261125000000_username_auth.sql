@@ -186,6 +186,9 @@ $$;
 -- Bootstrap admin menerima username atau email (kompatibel dengan deploy lama).
 -- ---------------------------------------------------------------------------
 
+-- Nama parameter berubah dari p_email, jadi harus di-drop dulu.
+drop function if exists public.bootstrap_admin(text);
+
 create or replace function public.bootstrap_admin(p_identifier text)
 returns void
 language plpgsql
@@ -215,6 +218,10 @@ begin
     and role = 'user';
 end;
 $$;
+
+revoke all on function public.bootstrap_admin(text) from public;
+revoke all on function public.bootstrap_admin(text) from anon, authenticated;
+grant execute on function public.bootstrap_admin(text) to service_role;
 
 -- ---------------------------------------------------------------------------
 -- Ringkasan admin menyertakan username (return type berubah, bukan create-or-replace).
