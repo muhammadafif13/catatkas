@@ -4,9 +4,9 @@ import {
   ArrowDownLeft,
   ArrowLeft,
   ArrowUpRight,
+  AtSign,
   Ban,
   CheckCircle2,
-  Mail,
   ShieldCheck,
   Trash2,
   Wallet,
@@ -30,8 +30,8 @@ const TABS = [
   { value: 'budgets', label: 'Budget' },
 ];
 
-function initials(name, email) {
-  return String(name || email || '?')
+function initials(name, fallback) {
+  return String(name || fallback || '?')
     .split(/\s+/)
     .filter(Boolean)
     .slice(0, 2)
@@ -101,8 +101,8 @@ export default function AdminUserDetailPage() {
     const confirmed = await requestConfirm({
       title: suspending ? 'Tangguhkan pengguna?' : 'Aktifkan kembali pengguna?',
       message: suspending
-        ? `${user.email} tidak akan bisa masuk atau mengubah data sampai diaktifkan kembali.`
-        : `${user.email} akan bisa masuk dan mencatat data kembali.`,
+        ? `${user.username} tidak akan bisa masuk atau mengubah data sampai diaktifkan kembali.`
+        : `${user.username} akan bisa masuk dan mencatat data kembali.`,
       confirmLabel: suspending ? 'Tangguhkan' : 'Aktifkan',
       danger: suspending,
     });
@@ -124,7 +124,7 @@ export default function AdminUserDetailPage() {
     if (!user) return;
     const confirmed = await requestConfirm({
       title: 'Hapus akun pengguna?',
-      message: `Akun ${user.email} beserta data keuangan, profil, dan akses login akan dihapus permanen. Tindakan ini tidak bisa dibatalkan.`,
+      message: `Akun ${user.username} beserta data keuangan, profil, dan akses login akan dihapus permanen. Tindakan ini tidak bisa dibatalkan.`,
       confirmLabel: 'Hapus Permanen',
       danger: true,
     });
@@ -162,7 +162,7 @@ export default function AdminUserDetailPage() {
       <section className="admin-profile-card">
         <div className="admin-profile-card__main">
           <span className="admin-avatar admin-avatar--lg">
-            {initials(user.fullName, user.email)}
+            {initials(user.fullName, user.username)}
           </span>
           <div>
             <div className="admin-profile-card__name">
@@ -175,8 +175,8 @@ export default function AdminUserDetailPage() {
               ) : null}
             </div>
             <div className="admin-profile-card__email">
-              <Mail size={14} aria-hidden="true" />
-              {user.email}
+              <AtSign size={14} aria-hidden="true" />
+              {user.username}
             </div>
             <div className="admin-profile-card__meta">
               Bergabung {formatDateTime(user.createdAt)} · Terakhir dibuka{' '}

@@ -1,16 +1,17 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { ArrowRight, Mail, UserRound } from 'lucide-react';
+import { ArrowRight, AtSign, UserRound } from 'lucide-react';
 import AuthAlert from '../../components/auth/AuthAlert';
 import AuthLayout from '../../components/auth/AuthLayout';
 import PasswordInput from '../../components/auth/PasswordInput';
 import FormField from '../../components/forms/FormField';
 import { useAuthStore } from '../../stores/useAuthStore';
 import { getErrorMessage } from '../../utils/helpers';
+import { isValidUsername, normalizeUsername } from '../../utils/validation';
 
 const initialForm = {
   fullName: '',
-  email: '',
+  username: '',
   password: '',
   confirmPassword: '',
   terms: false,
@@ -32,8 +33,8 @@ export default function RegisterPage() {
   const validate = () => {
     const next = {};
     if (form.fullName.trim().length < 2) next.fullName = 'Nama minimal 2 karakter.';
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email.trim())) {
-      next.email = 'Masukkan alamat email yang valid.';
+    if (!isValidUsername(normalizeUsername(form.username))) {
+      next.username = 'Username harus 3-20 karakter: huruf, angka, titik, atau garis bawah.';
     }
     if (form.password.length < 8) next.password = 'Password minimal 8 karakter.';
     if (form.password !== form.confirmPassword) {
@@ -53,15 +54,15 @@ export default function RegisterPage() {
     try {
       const result = await signUp({
         fullName: form.fullName,
-        email: form.email,
+        username: form.username,
         password: form.password,
       });
 
       navigate('/login', {
         replace: true,
         state: {
-          notice: 'Akun berhasil dibuat. Silakan masuk dengan email dan password kamu.',
-          email: result.email,
+          notice: 'Akun berhasil dibuat. Silakan masuk dengan username dan password kamu.',
+          username: result.username,
         },
       });
     } catch (signUpError) {
@@ -96,18 +97,22 @@ export default function RegisterPage() {
           </div>
         </FormField>
 
-        <FormField label="Email" htmlFor="register-email" error={errors.email}>
+        <FormField
+          label="Username"
+          htmlFor="register-username"
+          error={errors.username}
+          hint="3-20 karakter: huruf, angka, titik, atau garis bawah."
+        >
           <div className="input-wrap">
-            <Mail aria-hidden="true" />
+            <AtSign aria-hidden="true" />
             <input
-              id="register-email"
-              type="email"
+              id="register-username"
+              type="text"
               className="input"
-              value={form.email}
-              onChange={(event) => update('email', event.target.value)}
-              placeholder="nama@email.com"
-              autoComplete="email"
-              inputMode="email"
+              value={form.username}
+              onChange={(event) => update('username', normalizeUsername(event.target.value))}
+              placeholder="nama.pengguna"
+              autoComplete="username"
               required
             />
           </div>

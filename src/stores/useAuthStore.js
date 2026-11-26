@@ -11,6 +11,7 @@ import { requestAccountDeletion } from '../services/account';
 import { refreshDataStores, syncUserData } from '../services/sync';
 import { resetDataStores } from './resetDataStores';
 import { useConsentStore } from './useConsentStore';
+import { isValidUsername, normalizeUsername } from '../utils/validation';
 
 const PROFILE_CACHE_KEY = 'catatkas.profile.v2';
 let hydrateGeneration = 0;
@@ -51,21 +52,21 @@ function clearCachedProfile() {
 
 export function authErrorMessage(error) {
   const message = String(error?.message || error || '');
-  if (/invalid login credentials/i.test(message)) return 'Email atau password salah.';
+  if (/invalid login credentials/i.test(message)) return 'Username atau password salah.';
   if (/email not confirmed/i.test(message)) {
-    return 'Email akun ini belum dikonfirmasi. Hubungi admin CatatKas.';
+    return 'Akun ini belum dikonfirmasi. Hubungi admin CatatKas.';
   }
   if (/user.*banned|banned.*user|user.*blocked/i.test(message)) {
     return 'Akun ini sedang ditangguhkan. Hubungi admin CatatKas.';
   }
-  if (/user already registered/i.test(message)) return 'Email ini sudah terdaftar.';
+  if (/user already registered/i.test(message)) return 'Username ini sudah terdaftar.';
   if (/password should be at least/i.test(message)) {
     return 'Password minimal 8 karakter.';
   }
   if (/too many requests|rate limit/i.test(message)) {
     return 'Terlalu banyak percobaan. Tunggu beberapa saat lalu coba lagi.';
   }
-  if (/invalid email/i.test(message)) return 'Format email tidak valid.';
+  if (/invalid email/i.test(message)) return 'Email internal tidak valid. Hubungi admin CatatKas.';
   if (/network|failed to fetch/i.test(message)) {
     return 'Tidak dapat menghubungi server. Periksa koneksi internet.';
   }
@@ -147,7 +148,7 @@ async function hydrate(session) {
     cacheProfile(profile);
     saveOfflineIdentity({
       userId: user.id,
-      email: profile.email,
+      username: profile.username,
       fullName: profile.fullName,
       role: profile.role,
     });
@@ -379,23 +380,50 @@ export const useAuthStore = create((set, get) => ({
     }
   },
 
-  signIn: async (email, password) => {
+  signIn: async (username, password) => {
     if (!isSupabaseConfigured) throw new Error('Supabase belum dikonfigurasi.');
-    const { error } = await supabase.auth.signInWithPassword({
-      email: String(email || '').trim(),
-      password,
+    const { data, error } = await supabase.functions.invoke('username-auth', {
+      body: { username: normalizeUsername(username), password },
     });
-    if (error) throw new Error(authErrorMessage(error));
+    if (error) {
+      let message = error.message;
+      try {
+        const body = await error.context?.json();
+        message = body?.error || message;
+      } catch {
+        // Pakai pesan default dari Supabase jika body tidak bisa dibaca.
+      }
+      throw new Error(authErrorMessage(message));
+    }
+
+    const { error: sessionError } = await supabase.auth.setSession({
+      access_token: data?.access_token,
+      refresh_token: data?.refresh_token,
+    });
+    if (sessionError) throw new Error(authErrorMessage(sessionError));
   },
 
-  signUp: async ({ fullName, email, password }) => {
+  signUp: async ({ fullName, username, password }) => {
     if (!isSupabaseConfigured) throw new Error('Supabase belum dikonfigurasi.');
-    const emailAddress = String(email || '').trim();
+    const normalized = normalizeUsername(username);
+    if (!isValidUsername(normalized)) {
+      throw new Error('Username harus 3-20 karakter: huruf, angka, titik, atau garis bawah.');
+    }
+
+    const { data: available, error: checkError } = await supabase.rpc('is_username_available', {
+      p_username: normalized,
+    });
+    if (checkError) throw new Error(authErrorMessage(checkError));
+    if (!available) throw new Error('Username sudah digunakan. Silakan pilih yang lain.');
+
     const { data, error } = await supabase.auth.signUp({
-      email: emailAddress,
+      email: `${normalized}@catatkas.local`,
       password,
       options: {
-        data: { full_name: String(fullName || '').trim() },
+        data: {
+          full_name: String(fullName || '').trim(),
+          username: normalized,
+        },
       },
     });
     if (error) throw new Error(authErrorMessage(error));
@@ -407,7 +435,7 @@ export const useAuthStore = create((set, get) => ({
 
     await supabase.auth.signOut({ scope: 'local' });
     await clearLocalSession();
-    return { email: emailAddress };
+    return { username: normalized };
   },
 
   requestPasswordReset: async (email) => {

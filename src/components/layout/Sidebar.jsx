@@ -69,11 +69,11 @@ export default function Sidebar() {
         <div className="sidebar__account">
           <NavLink to="/settings" className="sidebar__account-link">
             <span className="sidebar__account-avatar">
-              {(profile?.fullName || profile?.email || '?').slice(0, 1).toUpperCase()}
+              {(profile?.fullName || profile?.username || '?').slice(0, 1).toUpperCase()}
             </span>
             <span className="sidebar__account-copy">
               <strong>{profile?.fullName || 'Pengguna'}</strong>
-              <small>{profile?.email}</small>
+              <small>{profile?.username ? `@${profile.username}` : ''}</small>
             </span>
           </NavLink>
           <button

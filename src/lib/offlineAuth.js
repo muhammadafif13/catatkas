@@ -1,10 +1,10 @@
 const ID_KEY = 'catatkas.offlineIdentity.v1';
 
-export function saveOfflineIdentity({ userId, email = '', fullName = '', role = 'user' }) {
+export function saveOfflineIdentity({ userId, username = '', fullName = '', role = 'user' }) {
   try {
     window.localStorage.setItem(
       ID_KEY,
-      JSON.stringify({ userId, email, fullName, role, savedAt: Date.now() }),
+      JSON.stringify({ userId, username, fullName, role, savedAt: Date.now() }),
     );
   } catch {
     // Ignore storage errors

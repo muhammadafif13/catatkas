@@ -48,8 +48,8 @@ const themeIcons = {
 
 const LEGACY_IMPORTED_KEY = 'catatkas.legacyImported.v2';
 
-function initials(name, email) {
-  const source = String(name || email || '?').trim();
+function initials(name, fallback) {
+  const source = String(name || fallback || '?').trim();
   const parts = source.split(/\s+/).filter(Boolean);
   return parts
     .slice(0, 2)
@@ -65,7 +65,6 @@ export default function SettingsPage() {
   const accountList = useAccountStore((state) => state.accounts);
   const signOut = useAuthStore((state) => state.signOut);
   const deleteAccount = useAuthStore((state) => state.deleteAccount);
-  const requestPasswordReset = useAuthStore((state) => state.requestPasswordReset);
   const adsenseConsent = useConsentStore((state) => state.adsenseConsent);
   const grantAdsense = useConsentStore((state) => state.grantAdsense);
   const denyAdsense = useConsentStore((state) => state.denyAdsense);
@@ -80,12 +79,11 @@ export default function SettingsPage() {
   const [threshold, setThreshold] = useState(settings.budgetAlertThreshold);
   const [resetting, setResetting] = useState(false);
   const [signingOut, setSigningOut] = useState(false);
-  const [sendingReset, setSendingReset] = useState(false);
   const [legacyAvailable, setLegacyAvailable] = useState(false);
   const [importingLegacy, setImportingLegacy] = useState(false);
   const [openingPrivacy, setOpeningPrivacy] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
-  const [deleteEmail, setDeleteEmail] = useState('');
+  const [deleteUsername, setDeleteUsername] = useState('');
   const [deleting, setDeleting] = useState(false);
 
   useEffect(() => {
@@ -98,8 +96,8 @@ export default function SettingsPage() {
     void hasLegacyData().then(setLegacyAvailable);
   }, [profile?.role]);
 
-  const emailMatches =
-    deleteEmail.trim().toLowerCase() === String(profile?.email || '').trim().toLowerCase();
+  const usernameMatches =
+    deleteUsername.trim().toLowerCase() === String(profile?.username || '').trim().toLowerCase();
 
   const changeSetting = async (key, value) => {
     try {
@@ -139,7 +137,7 @@ export default function SettingsPage() {
   };
 
   const handleDeleteAccount = async () => {
-    if (!emailMatches) return;
+    if (!usernameMatches) return;
 
     setDeleting(true);
     try {
@@ -158,7 +156,7 @@ export default function SettingsPage() {
     const confirmed = await requestConfirm({
       title: 'Keluar dari akun?',
       message:
-        'Data di perangkat ini akan dibersihkan. Kamu bisa masuk lagi kapan saja dengan email dan password yang sama.',
+        'Data di perangkat ini akan dibersihkan. Kamu bisa masuk lagi kapan saja dengan username dan password yang sama.',
       confirmLabel: 'Keluar',
       danger: true,
     });
@@ -167,19 +165,6 @@ export default function SettingsPage() {
     setSigningOut(true);
     await signOut();
     navigate('/login', { replace: true });
-  };
-
-  const handlePasswordReset = async () => {
-    if (!profile?.email) return;
-    setSendingReset(true);
-    try {
-      await requestPasswordReset(profile.email);
-      toast.success('Tautan ubah password sudah dikirim ke email akunmu.', 4500);
-    } catch (error) {
-      toast.error(getErrorMessage(error));
-    } finally {
-      setSendingReset(false);
-    }
   };
 
   const handleLegacyImport = async () => {
@@ -233,10 +218,14 @@ export default function SettingsPage() {
     <div className="page settings-page">
       <section className="settings-section account-panel">
         <div className="account-panel__identity">
-          <span className="account-panel__avatar">{initials(profile?.fullName, profile?.email)}</span>
+          <span className="account-panel__avatar">
+            {initials(profile?.fullName, profile?.username)}
+          </span>
           <div>
             <div className="account-panel__name">{profile?.fullName || 'Pengguna CatatKas'}</div>
-            <div className="account-panel__email">{profile?.email}</div>
+            <div className="account-panel__email">
+              {profile?.username ? `@${profile.username}` : ''}
+            </div>
             <div className="account-panel__badges">
               <span className={`badge ${profile?.role === 'admin' ? 'badge--primary' : 'badge--neutral'}`}>
                 {profile?.role === 'admin' ? 'Admin pemilik' : 'Pengguna'}
@@ -252,15 +241,10 @@ export default function SettingsPage() {
               Panel admin
             </Link>
           ) : null}
-          <button
-            type="button"
-            className="btn btn--ghost btn--sm"
-            onClick={handlePasswordReset}
-            disabled={sendingReset}
-          >
+          <Link to="/forgot-password" className="btn btn--ghost btn--sm">
             <KeyRound aria-hidden="true" />
-            {sendingReset ? 'Mengirim…' : 'Ubah password'}
-          </button>
+            Ubah password
+          </Link>
           <button
             type="button"
             className="btn btn--ghost btn--sm"
@@ -630,7 +614,7 @@ export default function SettingsPage() {
             <div className="setting-row__label">Hapus akun</div>
             <div className="setting-row__description">
               Akun, profil, dan seluruh catatan keuangan dihapus permanen dari server. Kamu akan
-              keluar dan tidak bisa masuk lagi dengan email ini.
+              keluar dan tidak bisa masuk lagi dengan username ini.
             </div>
           </div>
           <div className="setting-row__control">
@@ -641,7 +625,7 @@ export default function SettingsPage() {
                 type="button"
                 className="btn btn--danger-soft btn--sm"
                 onClick={() => {
-                  setDeleteEmail('');
+                  setDeleteUsername('');
                   setDeleteOpen(true);
                 }}
               >
@@ -674,7 +658,7 @@ export default function SettingsPage() {
               type="button"
               className="btn btn--danger"
               onClick={handleDeleteAccount}
-              disabled={!emailMatches || deleting}
+              disabled={!usernameMatches || deleting}
             >
               <Trash2 aria-hidden="true" />
               {deleting ? 'Menghapus…' : 'Hapus permanen'}
@@ -686,17 +670,17 @@ export default function SettingsPage() {
           Sebelum melanjutkan, ekspor backup jika kamu masih membutuhkan catatan keuangan.
         </p>
         <FormField
-          label={`Ketik ${profile?.email || 'email akun'} untuk konfirmasi`}
-          htmlFor="delete-account-email"
-          error={deleteEmail && !emailMatches ? 'Email tidak cocok.' : ''}
+          label={`Ketik ${profile?.username || 'username akun'} untuk konfirmasi`}
+          htmlFor="delete-account-username"
+          error={deleteUsername && !usernameMatches ? 'Username tidak cocok.' : ''}
         >
           <input
-            id="delete-account-email"
+            id="delete-account-username"
             className="input"
-            type="email"
+            type="text"
             autoComplete="off"
-            value={deleteEmail}
-            onChange={(event) => setDeleteEmail(event.target.value)}
+            value={deleteUsername}
+            onChange={(event) => setDeleteUsername(event.target.value)}
             disabled={deleting}
           />
         </FormField>

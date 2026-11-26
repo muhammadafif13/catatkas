@@ -24,7 +24,8 @@ export function RequireAuth() {
             <ShieldOff size={28} aria-hidden="true" />
           </span>
           <p>
-            Akun <strong>{profile?.email}</strong> tidak dapat membuka data saat ini. Hubungi admin
+            Akun <strong>{profile?.username || profile?.fullName}</strong> tidak dapat membuka data
+            saat ini. Hubungi admin
             jika kamu merasa ini keliru.
           </p>
           <button type="button" className="btn btn--primary btn--block" onClick={signOut}>

@@ -2,6 +2,7 @@ export function profileFromRow(row) {
   if (!row) return null;
   return {
     id: row.id,
+    username: row.username || '',
     email: row.email || '',
     fullName: row.full_name || '',
     role: row.role === 'admin' ? 'admin' : 'user',

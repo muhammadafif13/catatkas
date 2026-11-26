@@ -38,7 +38,7 @@ const sections = [
     title: 'Data yang dikumpulkan',
     body: 'Kami hanya meminta data yang diperlukan untuk menjalankan aplikasi.',
     items: [
-      'Data akun: nama lengkap, alamat email, waktu akun dibuat, dan waktu terakhir aktif.',
+      'Data akun: username, nama lengkap, alamat email internal yang dibuat otomatis dari username, waktu akun dibuat, dan waktu terakhir aktif.',
       'Kata sandi dikelola oleh layanan autentikasi Supabase dan disimpan dalam bentuk hash; kami tidak dapat melihat kata sandi asli.',
       'Data keuangan: dompet/akun, kategori, transaksi, budget, transfer, serta pengaturan tampilan.',
       'Data teknis: alamat IP, waktu akses, dan log kesalahan untuk keamanan dan stabilitas layanan.',
@@ -135,7 +135,7 @@ const sections = [
     body: 'Kamu berhak untuk:',
     items: [
       'Meminta informasi tentang data yang kami simpan dan cara penggunaannya.',
-      'Memperbaiki nama, email, atau data keuangan yang tidak akurat.',
+      'Memperbaiki username, nama, atau data keuangan yang tidak akurat.',
       'Mengekspor data keuangan melalui menu Ekspor (CSV atau backup JSON).',
       'Menghapus data keuangan melalui menu Pengaturan atau meminta penghapusan akun.',
       'Menarik persetujuan iklan kapan saja melalui preferensi iklan.',
@@ -147,7 +147,7 @@ const sections = [
     id: 'hapus-akun',
     icon: Trash2,
     title: 'Menghapus akun dan data',
-    body: 'Untuk menghapus data keuangan saja, buka Pengaturan → Zona berbahaya → Hapus Semua Data. Tindakan ini menghapus catatan keuangan dan membuat data awal baru, tanpa menghapus akun. Untuk menghapus akun beserta seluruh data terkait, buka Pengaturan → Zona berbahaya → Hapus akun, lalu ketik alamat email akun sebagai konfirmasi. Kamu akan langsung keluar dan data dihapus dari server. Kalau kamu tidak bisa masuk, kirim email dari alamat yang terdaftar dengan subjek “Permintaan Penghapusan Akun CatatKas”. Setelah identitas diverifikasi, akun dan data keuangan akan dihapus. Data yang wajib disimpan untuk kepatuhan hukum dapat dipertahankan untuk periode yang diperlukan.',
+    body: 'Untuk menghapus data keuangan saja, buka Pengaturan → Zona berbahaya → Hapus Semua Data. Tindakan ini menghapus catatan keuangan dan membuat data awal baru, tanpa menghapus akun. Untuk menghapus akun beserta seluruh data terkait, buka Pengaturan → Zona berbahaya → Hapus akun, lalu ketik username akun sebagai konfirmasi. Kamu akan langsung keluar dan data dihapus dari server. Kalau kamu tidak bisa masuk, hubungi pengelola CatatKas dengan menyertakan username akun dan subjek “Permintaan Penghapusan Akun CatatKas”. Setelah identitas diverifikasi, akun dan data keuangan akan dihapus. Data yang wajib disimpan untuk kepatuhan hukum dapat dipertahankan untuk periode yang diperlukan.',
     note: 'Penghapusan akun bersifat permanen. Kamu tidak dapat memulihkan transaksi, budget, atau dompet yang sudah dihapus, kecuali dari backup yang kamu unduh sendiri.',
     contact: true,
   },

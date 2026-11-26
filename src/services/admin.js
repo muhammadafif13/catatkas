@@ -45,6 +45,7 @@ export async function getAdminUsers() {
 
   return (data || []).map((row) => ({
     id: row.id,
+    username: row.username || '',
     email: row.email || '',
     fullName: row.full_name || '',
     role: row.role,

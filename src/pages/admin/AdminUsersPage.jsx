@@ -24,8 +24,8 @@ const FILTERS = [
   { value: 'admin', label: 'Admin' },
 ];
 
-function initials(name, email) {
-  return String(name || email || '?')
+function initials(name, fallback) {
+  return String(name || fallback || '?')
     .split(/\s+/)
     .filter(Boolean)
     .slice(0, 2)
@@ -69,7 +69,7 @@ export default function AdminUsersPage() {
       if (filter === 'admin' && user.role !== 'admin') return false;
       if (!keyword) return true;
       return (
-        user.email.toLowerCase().includes(keyword) ||
+        user.username.toLowerCase().includes(keyword) ||
         user.fullName.toLowerCase().includes(keyword)
       );
     });
@@ -80,8 +80,8 @@ export default function AdminUsersPage() {
     const confirmed = await requestConfirm({
       title: suspending ? 'Tangguhkan pengguna?' : 'Aktifkan kembali pengguna?',
       message: suspending
-        ? `${user.email} tidak akan bisa masuk atau mengubah data sampai diaktifkan kembali. Data keuangan tetap tersimpan.`
-        : `${user.email} akan bisa masuk dan mencatat data kembali.`,
+        ? `${user.username} tidak akan bisa masuk atau mengubah data sampai diaktifkan kembali. Data keuangan tetap tersimpan.`
+        : `${user.username} akan bisa masuk dan mencatat data kembali.`,
       confirmLabel: suspending ? 'Tangguhkan' : 'Aktifkan',
       danger: suspending,
     });
@@ -150,7 +150,7 @@ export default function AdminUsersPage() {
             className="input"
             value={search}
             onChange={(event) => setSearch(event.target.value)}
-            placeholder="Cari nama atau email…"
+            placeholder="Cari nama atau username…"
             aria-label="Cari pengguna"
           />
         </div>
@@ -180,10 +180,10 @@ export default function AdminUsersPage() {
           {filtered.map((user) => (
             <div key={user.id} className="admin-table-row">
               <Link to={`/admin/users/${user.id}`} className="admin-identity">
-                <span className="admin-avatar">{initials(user.fullName, user.email)}</span>
+                <span className="admin-avatar">{initials(user.fullName, user.username)}</span>
                 <span>
                   <strong>{user.fullName || 'Tanpa nama'}</strong>
-                  <small>{user.email}</small>
+                  <small>{user.username ? `@${user.username}` : ''}</small>
                 </span>
               </Link>
 

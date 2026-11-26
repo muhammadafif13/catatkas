@@ -72,7 +72,7 @@ Di Supabase Dashboard → Authentication:
 Daftar akun lewat aplikasi, lalu jalankan di **SQL Editor** Supabase:
 
 ```sql
-select public.bootstrap_admin('email-admin-anda@gmail.com');
+select public.bootstrap_admin('username-admin-anda');
 ```
 
 ## 3. Build frontend
@@ -156,7 +156,7 @@ Checklist manual:
 - [ ] Register akun baru berhasil dan langsung bisa login.
 - [ ] Tambah transaksi, lalu data muncul di Supabase Table Editor.
 - [ ] Refresh halaman di route dalam (misalnya `/history`) tidak 404.
-- [ ] Reset password mengirim email.
+- [ ] Login dan registrasi memakai username; halaman lupa password menampilkan instruksi admin.
 - [ ] Upload bukti iklan masuk ke Storage bucket.
 - [ ] `/advertise` dapat memuat paket dari Edge Function.
 - [ ] Akun admin bisa membuka `/admin`.

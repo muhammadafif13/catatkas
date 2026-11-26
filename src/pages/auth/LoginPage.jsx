@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { ArrowRight, Mail } from 'lucide-react';
+import { ArrowRight, AtSign } from 'lucide-react';
 import AuthAlert from '../../components/auth/AuthAlert';
 import AuthLayout from '../../components/auth/AuthLayout';
 import PasswordInput from '../../components/auth/PasswordInput';
@@ -13,7 +13,7 @@ export default function LoginPage() {
   const location = useLocation();
   const signIn = useAuthStore((state) => state.signIn);
   const [form, setForm] = useState(() => ({
-    email: String(location.state?.email || ''),
+    username: String(location.state?.username || ''),
     password: '',
   }));
   const [error, setError] = useState('');
@@ -27,7 +27,7 @@ export default function LoginPage() {
     setError('');
     setSubmitting(true);
     try {
-      await signIn(form.email, form.password);
+      await signIn(form.username, form.password);
       navigate(from, { replace: true });
     } catch (signInError) {
       setError(getErrorMessage(signInError));
@@ -48,20 +48,19 @@ export default function LoginPage() {
       <form className="auth-form" onSubmit={handleSubmit} noValidate>
         {error ? <AuthAlert type="error">{error}</AuthAlert> : null}
 
-        <FormField label="Email" htmlFor="login-email">
+        <FormField label="Username" htmlFor="login-username">
           <div className="input-wrap">
-            <Mail aria-hidden="true" />
+            <AtSign aria-hidden="true" />
             <input
-              id="login-email"
-              type="email"
+              id="login-username"
+              type="text"
               className="input"
-              value={form.email}
-              onChange={(event) => update('email', event.target.value)}
-              placeholder="nama@email.com"
-              autoComplete="email"
-              inputMode="email"
+              value={form.username}
+              onChange={(event) => update('username', event.target.value)}
+              placeholder="nama.pengguna"
+              autoComplete="username"
               required
-              autoFocus={!form.email}
+              autoFocus={!form.username}
             />
           </div>
         </FormField>
@@ -71,7 +70,7 @@ export default function LoginPage() {
             id="login-password"
             value={form.password}
             onChange={(event) => update('password', event.target.value)}
-            autoFocus={Boolean(form.email)}
+            autoFocus={Boolean(form.username)}
           />
         </FormField>
 

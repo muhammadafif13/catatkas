@@ -82,12 +82,12 @@ Operasi yang membutuhkan service role, terutama suspend/aktifkan/hapus akun auth
 
 Persyaratan:
 
-- Registrasi memakai nama lengkap, email, password minimal 8 karakter, dan persetujuan syarat.
+- Registrasi memakai nama lengkap, username unik (3-20 karakter `a-z0-9._`), password minimal 8 karakter, dan persetujuan syarat. Field email disembunyikan; email internal dibuat otomatis dari username.
 - Verifikasi email tidak diwajibkan; akun langsung aktif setelah registrasi.
 - Setelah registrasi, sesi otomatis dari Supabase dibuang dan pengguna diarahkan ke halaman login untuk masuk manual.
-- Login memakai email dan password.
+- Login memakai username dan password. Username di-resolve menjadi email internal oleh Edge Function `username-auth`, lalu sesi dibuat di klien.
 - Sesi disimpan dan diperbarui otomatis.
-- Lupa password mengirim tautan reset; password baru minimal 8 karakter.
+- Lupa password diarahkan ke admin untuk pengaturan ulang; password baru minimal 8 karakter.
 - Route pengguna dilindungi dan route login/register dialihkan untuk sesi aktif.
 - Callback autentikasi menangani token valid, error hash, dan sesi yang tidak terbentuk.
 - Profil pengguna menampilkan status akun dan status suspend.
@@ -100,7 +100,8 @@ Data profil:
 | Field | Keterangan |
 |---|---|
 | `id` | UUID dari `auth.users` |
-| `email` | Disalin dari auth |
+| `username` | Identitas login, unik case-insensitive |
+| `email` | Email internal turunan username, bukan identitas login |
 | `full_name` | Nama tampilan |
 | `role` | `user` atau `admin` |
 | `is_suspended` | Status penangguhan |
@@ -376,7 +377,8 @@ Aturan utama:
 - Kombinasi unik mencegah budget ganda untuk kategori dan periode yang sama.
 - Profil memiliki indeks unik parsial agar hanya ada satu admin.
 - Trigger membuat profil dan data awal saat user auth baru dibuat.
-- Trigger melindungi `role`, `is_suspended`, `created_at`, dan email dari perubahan client biasa.
+- Trigger melindungi `role`, `is_suspended`, `created_at`, username, dan email dari perubahan client biasa.
+- Akun lama mendapat username otomatis dari bagian lokal email; duplikat diberi akhiran `.1`, `.2`, dst.
 - RLS pengguna hanya mengizinkan data miliknya dan hanya saat tidak ditangguhkan.
 - Admin memiliki akses select ke data keuangan, tetapi bukan akses tulis.
 - Kebijakan iklan hanya mengizinkan admin untuk insert/update/delete.
@@ -396,7 +398,9 @@ RPC server:
 - `create_public_ad_order(...)`
 - `submit_public_ad_proof(...)`
 - `admin_review_ad_order(order_id, action, note)`
-- `bootstrap_admin(email)` hanya untuk service role
+- `bootstrap_admin(identifier)` menerima username atau email, hanya untuk service role
+- `is_username_available(username)` untuk cek ketersediaan sebelum registrasi
+- Edge Function `username-auth` untuk login username
 
 ---
 

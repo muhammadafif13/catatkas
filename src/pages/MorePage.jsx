@@ -40,11 +40,11 @@ export default function MorePage() {
 
       <Link to="/settings" className="account-mini">
         <span className="account-mini__avatar">
-          {(profile?.fullName || profile?.email || '?').slice(0, 1).toUpperCase()}
+          {(profile?.fullName || profile?.username || '?').slice(0, 1).toUpperCase()}
         </span>
         <span className="account-mini__body">
           <strong>{profile?.fullName || 'Pengguna CatatKas'}</strong>
-          <small>{profile?.email}</small>
+          <small>{profile?.username ? `@${profile.username}` : ''}</small>
         </span>
         <span className="badge badge--neutral">{profile?.role === 'admin' ? 'Admin' : 'Akun'}</span>
         <ChevronRight size={18} aria-hidden="true" />

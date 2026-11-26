@@ -17,7 +17,7 @@ CatatKas adalah PWA pencatatan keuangan pribadi multi-user. Data utama disimpan 
 
 ### Pengguna
 
-- Registrasi tanpa verifikasi email, login manual, lupa password, dan reset password
+- Registrasi memakai username (tanpa field email), login manual dengan username, lupa password dibantu admin
 - Dashboard saldo, grafik, transaksi terbaru, dan ringkasan budget
 - CRUD transaksi, kategori, akun/dompet, budget, dan transfer antar akun
 - Riwayat dengan filter dan laporan bulanan
@@ -148,16 +148,16 @@ Layanan lokal:
 | Supabase Studio | `http://127.0.0.1:54323` |
 | Mailpit | `http://127.0.0.1:54324` |
 
-Email reset password tidak dikirim keluar saat development; buka Mailpit untuk mengambil tautannya. Signup tidak mengirim email verifikasi dan akun langsung aktif.
+Signup hanya meminta username; email internal dibuat otomatis dari username dan tidak dipakai untuk komunikasi. Confirm Email harus tetap dinonaktifkan agar akun langsung aktif.
 
-Jika **Confirm Email** baru dinonaktifkan pada project yang sudah memiliki akun belum terkonfirmasi, konfirmasi akun lama tersebut sekali melalui Admin API `updateUserById(id, { email_confirm: true })` agar dapat login.
+Jika **Confirm Email** baru dinonaktifkan pada project yang sudah memiliki akun belum terkonfirmasi, konfirmasi akun lama tersebut sekali melalui Admin API `updateUserById(id, { email_confirm: true })` agar dapat login dengan username.
 
 ### Menjadikan akun sebagai admin
 
 Daftar akun terlebih dahulu, lalu jalankan dari SQL Editor Supabase Studio:
 
 ```sql
-select public.bootstrap_admin('admin@example.com');
+select public.bootstrap_admin('admin.username');
 ```
 
 Fungsi ini hanya dapat dijalankan dengan akses service role dan tidak tersedia untuk client aplikasi. Sistem hanya mengizinkan satu admin.

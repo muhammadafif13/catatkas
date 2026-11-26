@@ -170,10 +170,10 @@ export default function AdminOverviewPage() {
           <div className="admin-user-list">
             {users.slice(0, 5).map((user) => (
               <Link key={user.id} to={`/admin/users/${user.id}`} className="admin-user-row">
-                <span className="admin-avatar">{initials(user.fullName, user.email)}</span>
+                <span className="admin-avatar">{initials(user.fullName, user.username)}</span>
                 <span className="admin-user-row__identity">
                   <strong>{user.fullName || 'Tanpa nama'}</strong>
-                  <small>{user.email}</small>
+                  <small>{user.username ? `@${user.username}` : ''}</small>
                 </span>
                 <span className="admin-user-row__meta">
                   <span>{user.transactionCount.toLocaleString('id-ID')} transaksi</span>
@@ -201,8 +201,8 @@ export default function AdminOverviewPage() {
   );
 }
 
-function initials(name, email) {
-  return String(name || email || '?')
+function initials(name, fallback) {
+  return String(name || fallback || '?')
     .split(/\s+/)
     .filter(Boolean)
     .slice(0, 2)

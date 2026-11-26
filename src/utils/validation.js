@@ -4,6 +4,21 @@ export function hasErrors(errors) {
   return Object.keys(errors || {}).length > 0;
 }
 
+const USERNAME_PATTERN = /^[a-z0-9._]{3,20}$/;
+
+export function normalizeUsername(value) {
+  return String(value ?? '')
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9._]+/g, '.')
+    .replace(/\.{2,}/g, '.')
+    .replace(/^\.+|\.+$/g, '');
+}
+
+export function isValidUsername(value) {
+  return USERNAME_PATTERN.test(String(value ?? ''));
+}
+
 export function validateTransaction(values = {}) {
   const errors = {};
   if (!['income', 'expense'].includes(values.type)) {
